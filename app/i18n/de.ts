@@ -1,23 +1,11 @@
-const en = {
+const de = {
   common: {
     punkto: "Punkto",
-    and: "and",
-  },
-  mainNavigator: {
-    homeTab: "Home",
-    tipsTab: "Tips",
-    qrTab: "QR",
-    storesTab: "Stores",
-    profileTab: "Profile",
   },
   welcomeScreen: {
     heading: "Earn Points. Get Rewards.",
     postscript: "This is a demo app that showcases the power of Punkto.",
     letsGo: "Let's go!",
-    newHere: "New here?",
-    login: "Login",
-    termsAgreement:
-      "By proceeding, I confirm my acceptance of Punkto's terms of use and privacy policy.",
   },
   errorScreen: {
     title: "Something went wrong!",
@@ -33,16 +21,12 @@ const en = {
       button: "Let's try this again",
     },
   },
+
   errors: {
     invalidEmail: "Invalid email address.",
   },
   loginScreen: {
-    continue: "Continue",
-    forgotEmail: "Forgot your email?",
-    letUsKnow: "Let us know",
-    niceToSeeYou: "Hey, nice to see you again!",
     logIn: "Log In",
-    enterPassword: "Enter Password",
     enterDetails:
       "Enter your details below to unlock top secret info. You'll never guess what we've got waiting. Or maybe you will; it's not rocket science here.",
     emailFieldLabel: "Email",
@@ -54,5 +38,5 @@ const en = {
   },
 }
 
-export default en
-export type Translations = typeof en
+export default de
+export type Translations = typeof de

@@ -42,6 +42,7 @@ export const colors = {
   textDim: palette.neutral600,
   background: palette.neutral200,
   border: palette.neutral400,
+  link: "rgba(0, 118, 252, 1)",
   tint: palette.primary500,
   tintInactive: palette.neutral300,
   separator: palette.neutral300,

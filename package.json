@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "main": "index.tsx",
+  "author": {
+    "name": "Sebastian Soric",
+    "email": "ssoric01@gmail.com",
+    "url": "https://github.com/ssox01"
+  },
+  "license": "MIT",
   "scripts": {
     "compile": "tsc --noEmit -p . --pretty",
     "lint": "eslint . --fix",

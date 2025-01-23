@@ -4,6 +4,7 @@ export const AuthenticationStoreModel = types
   .model("AuthenticationStore")
   .props({
     authToken: types.maybe(types.string),
+    isFirstStartup: true,
     authEmail: "",
   })
   .views((store) => ({
@@ -24,6 +25,9 @@ export const AuthenticationStoreModel = types
     },
     setAuthEmail(value: string) {
       store.authEmail = value.replace(/ /g, "")
+    },
+    setIsFirstStartup(value: boolean) {
+      store.isFirstStartup = value
     },
     logout() {
       store.authToken = undefined

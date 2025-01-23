@@ -14,6 +14,8 @@ import { DemoNavigator, DemoTabParamList } from "./DemoNavigator"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
 import { useAppTheme, useThemeProvider } from "@/utils/useAppTheme"
 import { ComponentProps } from "react"
+import { RouteNames } from "./RouteNames"
+import { MainNavigator, MainTabParamList } from "./MainNavigator"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -29,11 +31,11 @@ import { ComponentProps } from "react"
  *   https://reactnavigation.org/docs/typescript/#organizing-types
  */
 export type AppStackParamList = {
-  Welcome: undefined
-  Login: undefined
-  Demo: NavigatorScreenParams<DemoTabParamList>
-  // 🔥 Your screens go here
-  // IGNITE_GENERATOR_ANCHOR_APP_STACK_PARAM_LIST
+  [RouteNames.Welcome]: undefined
+  [RouteNames.EnterEmail]: undefined
+  [RouteNames.EnterPassword]: undefined
+  [RouteNames.Demo]: NavigatorScreenParams<DemoTabParamList>
+  [RouteNames.Main]: NavigatorScreenParams<MainTabParamList>
 }
 
 /**
@@ -52,12 +54,21 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 
 const AppStack = observer(function AppStack() {
   const {
-    authenticationStore: { isAuthenticated },
+    authenticationStore: { isAuthenticated, isFirstStartup },
   } = useStores()
 
   const {
     theme: { colors },
   } = useAppTheme()
+
+  const getInitialRoute = () => {
+    if (isFirstStartup) {
+      return RouteNames.Welcome
+    } else if (isAuthenticated) {
+      return RouteNames.EnterEmail
+    }
+    return RouteNames.Main
+  }
 
   return (
     <Stack.Navigator
@@ -68,17 +79,17 @@ const AppStack = observer(function AppStack() {
           backgroundColor: colors.background,
         },
       }}
-      initialRouteName={isAuthenticated ? "Welcome" : "Login"}
+      initialRouteName={getInitialRoute()}
     >
       {isAuthenticated ? (
         <>
-          <Stack.Screen name="Welcome" component={Screens.WelcomeScreen} />
-
-          <Stack.Screen name="Demo" component={DemoNavigator} />
+          <Stack.Screen name={RouteNames.Main} component={MainNavigator} />
         </>
       ) : (
         <>
-          <Stack.Screen name="Login" component={Screens.LoginScreen} />
+          <Stack.Screen name={RouteNames.Welcome} component={Screens.WelcomeScreen} />
+          <Stack.Screen name={RouteNames.EnterEmail} component={Screens.EnterEmailScreen} />
+          <Stack.Screen name={RouteNames.EnterPassword} component={Screens.EnterPasswordScreen} />
         </>
       )}
 
