@@ -2,6 +2,7 @@ const en = {
   common: {
     punkto: "Punkto",
     and: "and",
+    close: "Close",
   },
   mainNavigator: {
     homeTab: "Home",

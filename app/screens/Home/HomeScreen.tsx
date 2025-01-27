@@ -1,13 +1,15 @@
 import { FC } from "react"
-import { TextStyle, View } from "react-native"
+import { TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { $styles, ThemedStyle } from "../../theme"
 import { MainTabScreenProps } from "../../navigators/MainNavigator"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { CardList } from "@/components/Card/CardList"
-import { RecommendationCard } from "@/components/Recommendation/RecommendationCard"
+import { RecommendationList } from "@/components/Recommendation/RecommendationList"
+import { RouteNames } from "@/navigators/RouteNames"
+import { SupportCard } from "@/components/SupportCard"
 
-export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_props) {
+export const HomeScreen: FC<MainTabScreenProps<RouteNames.Home>> = function HomeScreen(_props) {
   const { themed } = useAppTheme()
 
   return (
@@ -19,11 +21,7 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
         <Text size="sm" weight="semiBold" style={themed($yourCards)}>
           Your cards
         </Text>
-        <CardList
-          title="Card 1"
-          description="Card 1 description"
-          image="https://picsum.photos/200/300"
-        />
+        <CardList />
         <Text size="xs" weight="semiBold" style={themed($openAllCards)}>
           Open all cards
         </Text>
@@ -32,11 +30,37 @@ export const HomeScreen: FC<MainTabScreenProps<"Home">> = function HomeScreen(_p
         <Text size="sm" weight="semiBold" style={themed($recommandations)}>
           Recommandations
         </Text>
-        <RecommendationCard />
+        <RecommendationList />
+      </View>
+      <View style={themed($supportContainer)}>
+        <Text size="sm" weight="semiBold" style={themed($support)}>
+          Support
+        </Text>
+        <View style={themed($supportCards)}>
+          <SupportCard onPress={() => {}} title="Looking for help?" subtitle="Send us an email." />
+          <SupportCard
+            onPress={() => {}}
+            title="Can't find your fave spot?"
+            subtitle="Suggest it now!"
+          />
+        </View>
       </View>
     </Screen>
   )
 }
+
+const $support: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing.md,
+  marginTop: spacing.md,
+})
+
+const $supportContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.md,
+})
+
+const $supportCards: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.md,
+})
 
 const $heading: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.md,
@@ -49,10 +73,10 @@ const $yourCards: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 const $recommandations: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.md,
+  marginBottom: spacing.md,
 })
 
-const $openAllCards: ThemedStyle<TextStyle> = ({ spacing, colors }) => ({
-  marginTop: spacing.xs,
+const $openAllCards: ThemedStyle<TextStyle> = ({ colors }) => ({
   alignSelf: "center",
   color: colors.link,
 })

@@ -8,13 +8,20 @@ export function RecommendationCard() {
   const { themed } = useAppTheme()
   return (
     <View style={themed($container)}>
-      <Text>RecommendationCard</Text>
+      <Text size="sm" weight="semiBold" style={themed($title)}>
+        Exclusive Deals For New Customers
+      </Text>
       <Button preset="filled" style={themed($button)} text="Start" textStyle={themed($buttonText)}>
         Start
       </Button>
     </View>
   )
 }
+
+const $title: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.palette.neutral100,
+  maxWidth: 100,
+})
 
 const $button: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   width: 83,

@@ -8,7 +8,11 @@ import { RouteNames } from "./RouteNames"
 import { translate } from "@/i18n"
 import { Icon } from "@/components"
 import { CompositeScreenProps } from "@react-navigation/native"
-import { AppStackParamList, AppStackScreenProps } from "."
+import { TipsScreen } from "@/screens/Tips/TipsScreen"
+import { QrScreen } from "@/screens/QR/QrScreen"
+import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
+import { StoresScreen } from "@/screens/Stores/StoresScreen"
+import { ProfileScreen } from "@/screens/Profile/ProfileScreen"
 
 export type MainTabParamList = {
   Home: undefined
@@ -18,14 +22,20 @@ export type MainTabParamList = {
   Profile: undefined
 }
 
+export type RootStackParamList = {
+  TabNavigator: undefined
+  QRModal: undefined
+}
+
 export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList, T>,
-  AppStackScreenProps<keyof AppStackParamList>
+  NativeStackScreenProps<RootStackParamList>
 >
 
+const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator<MainTabParamList>()
 
-export function MainNavigator() {
+function TabNavigator() {
   const { bottom } = useSafeAreaInsets()
   const {
     themed,
@@ -56,7 +66,7 @@ export function MainNavigator() {
       />
       <Tab.Screen
         name={RouteNames.Tips}
-        component={HomeScreen}
+        component={TipsScreen}
         options={{
           tabBarLabel: translate("mainNavigator:tipsTab"),
           tabBarIcon: ({ focused }) => (
@@ -66,7 +76,13 @@ export function MainNavigator() {
       />
       <Tab.Screen
         name={RouteNames.QR}
-        component={HomeScreen}
+        component={QrScreen}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault()
+            navigation.navigate(RouteNames.QRModal)
+          },
+        })}
         options={{
           tabBarLabel: translate("mainNavigator:qrTab"),
           tabBarIcon: ({ focused }) => (
@@ -76,7 +92,7 @@ export function MainNavigator() {
       />
       <Tab.Screen
         name={RouteNames.Stores}
-        component={HomeScreen}
+        component={StoresScreen}
         options={{
           tabBarLabel: translate("mainNavigator:storesTab"),
           tabBarIcon: ({ focused }) => (
@@ -86,7 +102,7 @@ export function MainNavigator() {
       />
       <Tab.Screen
         name={RouteNames.Profile}
-        component={HomeScreen}
+        component={ProfileScreen}
         options={{
           tabBarLabel: translate("mainNavigator:profileTab"),
           tabBarIcon: ({ focused }) => (
@@ -95,6 +111,22 @@ export function MainNavigator() {
         }}
       />
     </Tab.Navigator>
+  )
+}
+
+export function MainNavigator() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="TabNavigator" component={TabNavigator} />
+      <Stack.Screen
+        name="QRModal"
+        component={QrScreen}
+        options={{
+          presentation: "modal",
+          animation: "slide_from_bottom",
+        }}
+      />
+    </Stack.Navigator>
   )
 }
 

@@ -7,6 +7,7 @@ export enum RouteNames {
   Home = "Home",
   Tips = "Tips",
   QR = "QR",
+  QRModal = "QRModal",
   Stores = "Stores",
   Profile = "Profile",
 }
