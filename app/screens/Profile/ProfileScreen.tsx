@@ -7,11 +7,15 @@ import { useAppTheme } from "@/utils/useAppTheme"
 import { FC } from "react"
 import { MenuCard } from "@/components/Profile/MenuCard"
 import { MenuItem } from "@/components/Profile/MenuItem"
+import { useStores } from "@/models"
 
 export const ProfileScreen: FC<MainTabScreenProps<RouteNames.Profile>> = function ProfileScreen(
   _props,
 ) {
   const { themed } = useAppTheme()
+  const {
+    authenticationStore: { logout },
+  } = useStores()
 
   return (
     <Screen preset="scroll" contentContainerStyle={$styles.container} safeAreaEdges={["top"]}>
@@ -35,6 +39,7 @@ export const ProfileScreen: FC<MainTabScreenProps<RouteNames.Profile>> = functio
         <MenuItem title="FAQ" onPress={() => {}} />
         <MenuItem title="Terms of use" onPress={() => {}} />
         <MenuItem title="Data Protection" onPress={() => {}} />
+        <MenuItem title="Logout" onPress={logout} />
       </View>
     </Screen>
   )

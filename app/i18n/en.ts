@@ -3,6 +3,20 @@ const en = {
     punkto: "Punkto",
     and: "and",
     close: "Close",
+    next: "Next",
+    finish: "Finish",
+  },
+  oneLastStepScreen: {
+    bestOffers: "I want the best offers",
+    later: "Later",
+  },
+  registerScreen: {
+    register: "Join now",
+    email: "Email address",
+    password: "Password",
+    confirmPassword: "Confirm Password",
+    termsAgreement:
+      "By proceeding, I confirm my acceptance of Punkto's terms of use and privacy policy.",
   },
   mainNavigator: {
     homeTab: "Home",

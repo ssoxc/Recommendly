@@ -6,6 +6,8 @@ export const AuthenticationStoreModel = types
     authToken: types.maybe(types.string),
     isFirstStartup: true,
     authEmail: "",
+    authPassword: "",
+    authPasswordConfirmation: "",
   })
   .views((store) => ({
     get isAuthenticated() {
@@ -18,6 +20,16 @@ export const AuthenticationStoreModel = types
         return "must be a valid email address"
       return ""
     },
+    get validationErrorPassword() {
+      if (store.authPassword.length === 0) return "can't be blank"
+      if (store.authPassword.length < 6) return "must be at least 6 characters"
+      return ""
+    },
+    get validationErrorPasswordConfirmation() {
+      if (store.authPasswordConfirmation.length === 0) return "can't be blank"
+      if (store.authPasswordConfirmation !== store.authPassword) return "must match"
+      return ""
+    },
   }))
   .actions((store) => ({
     setAuthToken(value?: string) {
@@ -26,12 +38,20 @@ export const AuthenticationStoreModel = types
     setAuthEmail(value: string) {
       store.authEmail = value.replace(/ /g, "")
     },
+    setAuthPassword(value: string) {
+      store.authPassword = value.replace(/ /g, "")
+    },
+    setAuthPasswordConfirmation(value: string) {
+      store.authPasswordConfirmation = value.replace(/ /g, "")
+    },
     setIsFirstStartup(value: boolean) {
       store.isFirstStartup = value
     },
     logout() {
       store.authToken = undefined
       store.authEmail = ""
+      store.authPassword = ""
+      store.authPasswordConfirmation = ""
     },
   }))
 

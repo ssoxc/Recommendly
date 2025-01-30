@@ -58,6 +58,7 @@ export const WelcomeScreen: FC<WelcomeScreenProps> = observer(function WelcomeSc
           testID="new-here-button"
           preset="filled"
           tx="welcomeScreen:newHere"
+          onPress={() => navigation.navigate(RouteNames.Register)}
         />
         <Button
           onPress={() => navigation.navigate(RouteNames.EnterEmail)}

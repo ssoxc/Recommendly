@@ -25,6 +25,7 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   TabNavigator: undefined
   QRModal: undefined
+  RegisterStack: undefined
 }
 
 export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScreenProps<
@@ -118,14 +119,7 @@ export function MainNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="TabNavigator" component={TabNavigator} />
-      <Stack.Screen
-        name="QRModal"
-        component={QrScreen}
-        options={{
-          presentation: "modal",
-          animation: "slide_from_bottom",
-        }}
-      />
+      <Stack.Screen name={RouteNames.QRModal} component={QrScreen} />
     </Stack.Navigator>
   )
 }

@@ -16,6 +16,10 @@ import { useAppTheme, useThemeProvider } from "@/utils/useAppTheme"
 import { ComponentProps } from "react"
 import { RouteNames } from "./RouteNames"
 import { MainNavigator, MainTabParamList } from "./MainNavigator"
+import { RegisterScreen } from "@/screens/Register/RegisterScreen"
+import { RegisterOneLastStepScreen } from "@/screens/Register/RegisterOneLastStepScreen"
+import { RegisterInterestsScreen } from "@/screens/Register/RegisterInterestsScreen"
+import { RegisterDoneScreen } from "@/screens/Register/RegisterDone"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -34,8 +38,12 @@ export type AppStackParamList = {
   [RouteNames.Welcome]: undefined
   [RouteNames.EnterEmail]: undefined
   [RouteNames.EnterPassword]: undefined
+  [RouteNames.Register]: undefined
   [RouteNames.Demo]: NavigatorScreenParams<DemoTabParamList>
   [RouteNames.Main]: NavigatorScreenParams<MainTabParamList>
+  [RouteNames.RegisterOneLastStep]: undefined
+  [RouteNames.RegisterInterests]: undefined
+  [RouteNames.RegisterDone]: undefined
 }
 
 /**
@@ -88,6 +96,13 @@ const AppStack = observer(function AppStack() {
       ) : (
         <>
           <Stack.Screen name={RouteNames.Welcome} component={Screens.WelcomeScreen} />
+          <Stack.Screen name={RouteNames.Register} component={RegisterScreen} />
+          <Stack.Screen name={RouteNames.RegisterInterests} component={RegisterInterestsScreen} />
+          <Stack.Screen
+            name={RouteNames.RegisterOneLastStep}
+            component={RegisterOneLastStepScreen}
+          />
+          <Stack.Screen name={RouteNames.RegisterDone} component={RegisterDoneScreen} />
           <Stack.Screen name={RouteNames.EnterEmail} component={Screens.EnterEmailScreen} />
           <Stack.Screen name={RouteNames.EnterPassword} component={Screens.EnterPasswordScreen} />
         </>
