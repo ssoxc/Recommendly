@@ -2,12 +2,12 @@ import { $styles, colors, ThemedStyle } from "@/theme"
 import { Button, Icon, Screen, Text } from "../../components"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { FC } from "react"
-import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { RouteNames } from "@/navigators/RouteNames"
 import { View, ViewStyle, TextStyle } from "react-native"
 import QRCode from "react-native-qrcode-svg"
+import { AppStackScreenProps } from "@/navigators"
 
-export const QrScreen: FC<MainTabScreenProps<RouteNames.QR>> = ({ navigation }) => {
+export const QrScreen: FC<AppStackScreenProps<RouteNames.QRModal>> = ({ navigation }) => {
   const { themed } = useAppTheme()
 
   return (

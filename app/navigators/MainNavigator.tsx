@@ -13,6 +13,8 @@ import { QrScreen } from "@/screens/QR/QrScreen"
 import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
 import { StoresScreen } from "@/screens/Stores/StoresScreen"
 import { ProfileScreen } from "@/screens/Profile/ProfileScreen"
+import { AllCardsScreen } from "@/screens/Cards/AllCardScreen"
+import { CardDetailScreen } from "@/screens/Cards/CardDetailScreen"
 
 export type MainTabParamList = {
   Home: undefined
@@ -20,12 +22,15 @@ export type MainTabParamList = {
   QR: undefined
   Stores: undefined
   Profile: undefined
+  AllCards: undefined
 }
 
 export type RootStackParamList = {
   TabNavigator: undefined
   QRModal: undefined
   RegisterStack: undefined
+  AllCards: undefined
+  CardDetails: undefined
 }
 
 export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScreenProps<
@@ -33,7 +38,7 @@ export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScre
   NativeStackScreenProps<RootStackParamList>
 >
 
-const Stack = createNativeStackNavigator()
+const Stack = createNativeStackNavigator<RootStackParamList>()
 const Tab = createBottomTabNavigator<MainTabParamList>()
 
 function TabNavigator() {
@@ -120,6 +125,8 @@ export function MainNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="TabNavigator" component={TabNavigator} />
       <Stack.Screen name={RouteNames.QRModal} component={QrScreen} />
+      <Stack.Screen name={RouteNames.AllCards} component={AllCardsScreen} />
+      <Stack.Screen name={RouteNames.CardDetails} component={CardDetailScreen} />
     </Stack.Navigator>
   )
 }

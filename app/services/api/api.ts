@@ -10,6 +10,8 @@ import Config from "../../config"
 import { GeneralApiProblem, getGeneralApiProblem } from "./apiProblem"
 import type { ApiConfig, ApiFeedResponse } from "./api.types"
 import type { EpisodeSnapshotIn } from "../../models/Episode"
+import { CardSnapshotIn } from "@/models/Card"
+import { faker } from "@faker-js/faker/."
 
 /**
  * Configuring the apisauce instance.
@@ -39,6 +41,61 @@ export class Api {
         Accept: "application/json",
       },
     })
+  }
+
+  async getCard(): Promise<{ kind: "ok"; card: CardSnapshotIn } | GeneralApiProblem> {
+    // const response: ApiResponse<ApiFeedResponse> = await this.apisauce.get(`/cards/${cardId}`)
+
+    // if (!response.ok) {
+    //   const problem = getGeneralApiProblem(response)
+    //   if (problem) return problem
+    // }
+    const mockColors = ["rgba(26, 52, 63, 1)", "rgba(142, 173, 187, 1)", "rgba(180, 140, 76, 1)"]
+
+    const mockCards = Array.from({ length: 3 }, (_, index) => ({
+      id: faker.string.uuid(),
+      name: faker.commerce.productName(),
+      description: faker.lorem.sentence(),
+      image: faker.image.url(),
+      points: faker.number.int({ min: 100, max: 1000 }),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      companyLogo: faker.image.url(),
+      storeName: faker.company.name(),
+      maxPoints: faker.number.int({ min: 1000, max: 10000 }),
+      rewardsAvailable: faker.number.int({ min: 1, max: 10 }),
+      brandColor: mockColors[index % mockColors.length],
+    }))
+
+    return { kind: "ok", card: mockCards[0] }
+  }
+
+  async getCards(): Promise<{ kind: "ok"; cards: CardSnapshotIn[] } | GeneralApiProblem> {
+    // const response: ApiResponse<ApiFeedResponse> = await this.apisauce.get(`/cards`)
+
+    // if (!response.ok) {
+    //   const problem = getGeneralApiProblem(response)
+    //   if (problem) return problem
+    // }
+
+    const mockColors = ["rgba(26, 52, 63, 1)", "rgba(142, 173, 187, 1)", "rgba(180, 140, 76, 1)"]
+
+    const mockCards = Array.from({ length: 3 }, (_, index) => ({
+      id: faker.string.uuid(),
+      name: faker.commerce.productName(),
+      description: faker.lorem.sentence(),
+      image: faker.image.url(),
+      points: faker.number.int({ min: 100, max: 1000 }),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      companyLogo: faker.image.url(),
+      storeName: faker.company.name(),
+      maxPoints: faker.number.int({ min: 1000, max: 10000 }),
+      rewardsAvailable: faker.number.int({ min: 1, max: 10 }),
+      brandColor: mockColors[index % mockColors.length],
+    }))
+
+    return { kind: "ok", cards: mockCards }
   }
 
   /**

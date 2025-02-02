@@ -1,36 +1,43 @@
-import { View, ViewStyle } from "react-native"
+import { Pressable, View, ViewStyle } from "react-native"
 import { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { Card } from "./Card"
-import { faker } from "@faker-js/faker"
+import { useStores } from "@/models"
+import { CardSnapshotIn } from "@/models/Card"
+import { useEffect } from "react"
 
-export function CardList() {
+export interface ICardListProps {
+  style?: ViewStyle
+  containerStyle?: ViewStyle
+  onCardPress?: (card: CardSnapshotIn) => void
+  cards?: CardSnapshotIn[]
+}
+export function CardList(_props: ICardListProps) {
   const { themed } = useAppTheme()
-  const mockColors = ["rgba(26, 52, 63, 1)", "rgba(142, 173, 187, 1)", "rgba(180, 140, 76, 1)"]
-  // Mock data
-  const mockCard = Array.from({ length: 3 }, (_, index) => ({
-    companyLogo: faker.image.url(),
-    storeName: faker.company.name(),
-    points: faker.number.int({ min: 100, max: 1000 }),
-    maxPoints: faker.number.int({ min: 1000, max: 10000 }),
-    rewardsAvailable: faker.number.int({ min: 1, max: 10 }),
-    brandColor: mockColors[index % mockColors.length],
-  }))
+  const { cardStore } = useStores()
+
+  useEffect(() => {
+    cardStore.fetchCards()
+  }, [])
 
   return (
-    <View style={themed($container)}>
-      {mockCard.map((card, index) => (
+    <View style={_props.containerStyle ?? themed($container)}>
+      {[...(_props.cards || cardStore.cards)].map((card, index) => (
         <View
           key={index}
-          style={[
-            themed($cardWrapper),
-            {
-              zIndex: index,
-              top: index * 50, // Add offset for each card
-            },
-          ]}
+          style={
+            _props.style ?? [
+              themed($cardWrapper),
+              {
+                zIndex: index,
+                top: index * 50, // Add offset for each card
+              },
+            ]
+          }
         >
-          <Card {...card} />
+          <Pressable onPress={() => _props.onCardPress?.(card)}>
+            <Card {...card} />
+          </Pressable>
         </View>
       ))}
     </View>

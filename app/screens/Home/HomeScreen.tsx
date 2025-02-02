@@ -1,5 +1,5 @@
 import { FC } from "react"
-import { TextStyle, View, ViewStyle } from "react-native"
+import { Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { Screen, Text } from "../../components"
 import { $styles, ThemedStyle } from "../../theme"
 import { MainTabScreenProps } from "../../navigators/MainNavigator"
@@ -22,9 +22,16 @@ export const HomeScreen: FC<MainTabScreenProps<RouteNames.Home>> = function Home
           Your cards
         </Text>
         <CardList />
-        <Text size="xs" weight="semiBold" style={themed($openAllCards)}>
-          Open all cards
-        </Text>
+        <Pressable
+          onPress={() => {
+            console.log("dasnfoinfiosdf")
+            _props.navigation.navigate(RouteNames.AllCards)
+          }}
+        >
+          <Text size="xs" weight="semiBold" style={themed($openAllCards)}>
+            Open all cards
+          </Text>
+        </Pressable>
       </View>
       <View>
         <Text size="sm" weight="semiBold" style={themed($recommandations)}>

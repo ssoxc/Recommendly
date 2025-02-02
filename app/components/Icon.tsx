@@ -119,6 +119,7 @@ export const iconRegistry = {
   user: require("../../assets/icons/user.png"),
   smile: require("../../assets/icons/smile.png"),
   like: require("../../assets/icons/like.png"),
+  phone: require("../../assets/icons/phone.png"),
 }
 
 const $imageStyleBase: ImageStyle = {

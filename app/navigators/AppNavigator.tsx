@@ -44,6 +44,9 @@ export type AppStackParamList = {
   [RouteNames.RegisterOneLastStep]: undefined
   [RouteNames.RegisterInterests]: undefined
   [RouteNames.RegisterDone]: undefined
+  [RouteNames.AllCards]: undefined
+  [RouteNames.CardDetails]: { cardId: string }
+  [RouteNames.QRModal]: undefined
 }
 
 /**

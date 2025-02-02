@@ -10,6 +10,8 @@ export enum RouteNames {
   QRModal = "QRModal",
   Stores = "Stores",
   Profile = "Profile",
+  AllCards = "AllCards",
+  CardDetails = "CardDetails",
   Register = "Register",
   RegisterInterests = "RegisterInterests",
   RegisterStack = "RegisterStack",
