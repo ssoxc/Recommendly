@@ -5,16 +5,15 @@ export const CardModel = types
   .model("Card", {
     id: types.identifier,
     name: types.string,
-    description: types.string,
     image: types.string,
     points: types.number,
-    createdAt: types.string,
-    updatedAt: types.string,
     companyLogo: types.string,
     storeName: types.string,
+    storeId: types.string,
     maxPoints: types.number,
     rewardsAvailable: types.number,
     brandColor: types.string,
+    pointsUntilNextReward: types.number,
   })
   .actions(withSetPropAction)
   .views((card) => ({

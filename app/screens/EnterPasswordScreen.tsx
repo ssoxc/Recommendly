@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite"
 import { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
-import { TextInput, TextStyle, ViewStyle, View } from "react-native"
+import { TextInput, TextStyle, ViewStyle, View, Alert } from "react-native"
 import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "../components"
 import { useStores } from "../models"
 import { AppStackScreenProps } from "../navigators"
@@ -8,6 +8,7 @@ import { $styles, type ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { useHeader } from "@/utils/useHeader"
 import { RouteNames } from "@/navigators/RouteNames"
+import { supabase } from "@/supabase/supabase"
 
 interface LoginScreenProps extends AppStackScreenProps<RouteNames.EnterPassword> {}
 
@@ -19,7 +20,7 @@ export const EnterPasswordScreen: FC<LoginScreenProps> = observer(function Login
   const [_, setIsSubmitted] = useState(false)
   const [attemptsCount, setAttemptsCount] = useState(0)
   const {
-    authenticationStore: { setAuthToken, validationError },
+    authenticationStore: { setAuthToken, validationError, authEmail },
   } = useStores()
 
   const {
@@ -30,7 +31,7 @@ export const EnterPasswordScreen: FC<LoginScreenProps> = observer(function Login
   useEffect(() => {
     // Here is where you could fetch credentials from keychain or storage
     // and pre-fill the form fields.
-    setAuthPassword("test")
+    setAuthPassword("test1234")
 
     // Return a "cleanup" function that React will run when the component unmounts
     return () => {
@@ -38,11 +39,20 @@ export const EnterPasswordScreen: FC<LoginScreenProps> = observer(function Login
     }
   }, [setAuthPassword])
 
-  function login() {
+  async function login() {
     setIsSubmitted(true)
     setAttemptsCount(attemptsCount + 1)
 
     if (validationError) return
+
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email: authEmail,
+      password: authPassword,
+    })
+
+    if (error) {
+      Alert.alert(error.message)
+    }
 
     // Make a request to your server to get an authentication token.
     // If successful, reset the fields and set the token.
@@ -50,7 +60,7 @@ export const EnterPasswordScreen: FC<LoginScreenProps> = observer(function Login
     setAuthPassword("")
 
     // We'll mock this with a fake token.
-    setAuthToken(String(Date.now()))
+    setAuthToken(data.session?.access_token)
   }
 
   useHeader(

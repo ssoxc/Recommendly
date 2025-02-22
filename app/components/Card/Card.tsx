@@ -10,6 +10,7 @@ type CardProps = {
   maxPoints: number
   rewardsAvailable: number
   brandColor: string
+  pointsUntilNextReward: number
 }
 
 export function Card({
@@ -19,6 +20,7 @@ export function Card({
   maxPoints,
   rewardsAvailable,
   brandColor,
+  pointsUntilNextReward,
 }: CardProps) {
   const { themed } = useAppTheme()
 
@@ -52,7 +54,7 @@ export function Card({
             Upcoming Reward
           </Text>
           <Text size="xxs" style={themed($upcomingReward)}>
-            + 100 P
+            + {pointsUntilNextReward} P
           </Text>
         </View>
         <View style={themed($progressContainer)}>
@@ -122,6 +124,7 @@ const $smallLogo: ThemedStyle<ImageStyle> = () => ({
   width: 50,
   height: 50,
   borderRadius: 35,
+  objectFit: "contain",
 })
 
 const $largeLogo: ThemedStyle<ImageStyle> = ({ spacing }) => ({
@@ -150,6 +153,6 @@ const $progressContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
 
 const $progressBar: ThemedStyle<ViewStyle> = ({ colors }) => ({
   height: "100%",
-  backgroundColor: colors.primary,
+  backgroundColor: colors.palette.neutral100,
   borderRadius: 4,
 })

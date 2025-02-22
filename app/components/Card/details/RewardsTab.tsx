@@ -1,53 +1,50 @@
 import { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { View, ViewStyle } from "react-native"
+import { ActivityIndicator, Alert, TouchableOpacity, View, ViewStyle } from "react-native"
 import { Text } from "../../../components"
+import { observer } from "mobx-react-lite"
+import { useStores } from "@/models"
+import { useEffect } from "react"
+import { Reward } from "@/models/Reward"
 
-export const RewardsTab = () => {
+interface RewardsTabProps {
+  onRewardPress: (reward: Reward) => void
+}
+
+export const RewardsTab = observer<RewardsTabProps>(({ onRewardPress }) => {
   const { themed } = useAppTheme()
+  const { rewardStore, cardStore } = useStores()
 
-  const mockRewards = [
-    {
-      cost: 10,
-      name: "One random item to collect",
-      color: "#00FC2E",
-    },
-    {
-      cost: 50,
-      name: "One random item to collect",
-      color: "#00FC2E",
-    },
-    {
-      cost: 200,
-      name: "One random item to collect",
-      color: "#00FC2E",
-    },
-    {
-      cost: 250,
-      name: "One random item to collect",
-      color: "#00FC2E",
-    },
-    {
-      cost: 500,
-      name: "One random item to collect",
-      color: "#D9D9D9",
-    },
-    {
-      cost: 1000,
-      name: "One random item to collect",
-      color: "#D9D9D9",
-    },
-    {
-      cost: 3000,
-      name: "One random item to collect",
-      color: "#D9D9D9",
-    },
-    {
-      cost: 10000,
-      name: "One random item to collect",
-      color: "#D9D9D9",
-    },
-  ]
+  useEffect(() => {
+    if (cardStore.card?.storeId) {
+      rewardStore.fetchRewards(cardStore.card?.storeId ?? "")
+    }
+  }, [cardStore.card?.storeId, rewardStore])
+
+  const getRewardBackgroundColor = (cost: number) => {
+    if (cost <= 100) {
+      return "#1C66D7"
+    } else if (cost <= 200) {
+      return "#1C66D7"
+    } else if (cost <= 300) {
+      return "#1C66D7"
+    } else if (cost <= 400) {
+      return "#1C66D7"
+    }
+    return "#E0E0E0"
+  }
+
+  const handleRewardPress = (reward: Reward) => {
+    if (reward.cost > (cardStore.card?.points || -1)) {
+      Alert.alert("You don't have enough points to redeem this reward.")
+      return
+    }
+    onRewardPress(reward)
+  }
+
+  if (rewardStore.isLoading) {
+    return <ActivityIndicator />
+  }
 
   return (
     <View style={themed($cardDetailContentContainer)}>
@@ -55,8 +52,15 @@ export const RewardsTab = () => {
         Choose from the following options.
       </Text>
       <View style={themed($rewardsContainer)}>
-        {mockRewards.map((reward, index) => (
-          <View style={[themed($rewardItem), { backgroundColor: reward.color }]} key={index}>
+        {rewardStore.rewards.map((reward, index) => (
+          <TouchableOpacity
+            onPress={() => handleRewardPress(reward)}
+            style={[
+              themed($rewardItem),
+              { backgroundColor: getRewardBackgroundColor(reward.cost) },
+            ]}
+            key={index}
+          >
             <View style={themed($rewardItemContent)}>
               <View style={themed($rewardItemCostContainer)}>
                 <Text size="xs" weight="semiBold">
@@ -69,7 +73,7 @@ export const RewardsTab = () => {
                 </Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
         <View style={themed($disclaimerContainer)}>
           <Text size="xxs" weight="light">
@@ -81,7 +85,7 @@ export const RewardsTab = () => {
       </View>
     </View>
   )
-}
+})
 
 const $disclaimerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginTop: spacing.md,

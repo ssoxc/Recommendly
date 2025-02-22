@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { RouteNames } from "./RouteNames"
 import { translate } from "@/i18n"
 import { Icon } from "@/components"
-import { CompositeScreenProps } from "@react-navigation/native"
+import { CompositeScreenProps, useRoute } from "@react-navigation/native"
 import { TipsScreen } from "@/screens/Tips/TipsScreen"
 import { QrScreen } from "@/screens/QR/QrScreen"
 import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
@@ -15,11 +15,16 @@ import { StoresScreen } from "@/screens/Stores/StoresScreen"
 import { ProfileScreen } from "@/screens/Profile/ProfileScreen"
 import { AllCardsScreen } from "@/screens/Cards/AllCardScreen"
 import { CardDetailScreen } from "@/screens/Cards/CardDetailScreen"
+import { useStores } from "@/models"
+import { useEffect } from "react"
+import { setupRewardPointChannel, supabase } from "@/supabase/supabase"
+import { FC } from "react"
 
 export type MainTabParamList = {
   Home: undefined
   Tips: undefined
   QR: undefined
+  QRModal: { rewardId?: string }
   Stores: undefined
   Profile: undefined
   AllCards: undefined
@@ -27,10 +32,10 @@ export type MainTabParamList = {
 
 export type RootStackParamList = {
   TabNavigator: undefined
-  QRModal: undefined
   RegisterStack: undefined
+  QRModal: { rewardId?: string }
+  CardDetails: { cardId: string }
   AllCards: undefined
-  CardDetails: undefined
 }
 
 export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScreenProps<
@@ -120,11 +125,61 @@ function TabNavigator() {
   )
 }
 
+const QRModal: FC<NativeStackScreenProps<RootStackParamList, RouteNames.QRModal>> = (props) => {
+  return <QrScreen {...props} />
+}
+
 export function MainNavigator() {
+  const route = useRoute()
+  const { cardStore } = useStores()
+
+  useEffect(() => {
+    const setupHandlers = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (cardStore.cards.length === 0) {
+        return
+      }
+      if (!user?.id) {
+        return
+      }
+      console.log(user.id, "user.id")
+      return setupRewardPointChannel(
+        cardStore.cards.map((card) => card.id),
+        user.id,
+        (cardId, amount) => {
+          console.log("cardId", cardId, "amount", amount)
+          cardStore.updateCardPoints(cardId, amount)
+        },
+        (cardId) => {
+          console.log("cardId is new card created", cardId)
+          cardStore.addCard(cardId)
+        },
+      )
+    }
+    setupHandlers()
+  }, [cardStore, route])
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="TabNavigator" component={TabNavigator} />
-      <Stack.Screen name={RouteNames.QRModal} component={QrScreen} />
+      <Stack.Group
+        screenOptions={{
+          presentation: "modal",
+          animation: "slide_from_bottom",
+          contentStyle: { backgroundColor: "transparent" },
+        }}
+      >
+        <Stack.Screen
+          name={RouteNames.QRModal}
+          component={QRModal}
+          options={() => ({
+            headerShown: false,
+            gestureEnabled: true,
+          })}
+        />
+      </Stack.Group>
       <Stack.Screen name={RouteNames.AllCards} component={AllCardsScreen} />
       <Stack.Screen name={RouteNames.CardDetails} component={CardDetailScreen} />
     </Stack.Navigator>

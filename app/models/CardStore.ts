@@ -1,33 +1,134 @@
 import { Instance, SnapshotOut, types } from "mobx-state-tree"
-import { CardModel } from "./Card"
+import { CardModel, CardSnapshotIn } from "./Card"
 import { withSetPropAction } from "./helpers/withSetPropAction"
-import { api } from "@/services/api"
+import { supabase } from "@/supabase/supabase"
 
 export const CardStoreModel = types
   .model("CardStore")
   .props({
+    isLoading: false,
     cards: types.array(CardModel),
-    card: types.maybe(CardModel),
+    card: types.maybe(types.reference(CardModel)),
     favorites: types.array(types.reference(CardModel)),
     favoritesOnly: false,
   })
   .actions(withSetPropAction)
   .actions((store) => ({
     async fetchCards() {
-      const response = await api.getCards()
-      if (response.kind === "ok") {
-        store.setProp("cards", response.cards)
-      } else {
-        console.error(`Error fetching cards: ${JSON.stringify(response)}`)
+      try {
+        store.setProp("isLoading", true)
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (!user) {
+          console.error("User not found")
+          return
+        }
+        const response = await supabase.from("Card").select("*").eq("user_id", user.id)
+        if (response.data) {
+          const promises = response.data.map(async (card) => {
+            return await this.fetchCard(card.id)
+          }) as Promise<CardSnapshotIn>[]
+          const cards = await Promise.all(promises)
+          store.setProp("cards", cards)
+        }
+      } catch (error) {
+        console.error(`Error fetching cards: ${error}`)
+        store.setProp("isLoading", false)
+      } finally {
+        store.setProp("isLoading", false)
       }
     },
     async fetchCard(cardId: string) {
-      const response = await api.getCard(cardId)
-      if (response.kind === "ok") {
-        store.setProp("card", response.card)
-      } else {
-        console.error(`Error fetching card: ${JSON.stringify(response)}`)
+      if (!cardId) {
+        return null
       }
+      const { data: cardData, error: cardError } = await supabase
+        .from("Card")
+        .select("*")
+        .eq("id", cardId)
+        .single()
+      if (cardError || !cardData) {
+        return null
+      }
+      const { data: storeData, error: storeError } = await supabase
+        .from("Store")
+        .select("*")
+        .eq("id", cardData.store_id!)
+        .single()
+      const { data: pointsData, error: pointsError } = await supabase
+        .from("RewardPoint")
+        .select("*")
+        .eq("id", cardData.points_id!)
+        .single()
+      if (pointsError || !pointsData) {
+        return null
+      }
+      const { data: nextRewardData } = await supabase
+        .from("ReademableReward")
+        .select("*")
+        .eq("store_id", cardData.store_id!)
+        .gt("cost", pointsData.amount)
+        .single()
+      const { data: availableRewardsData, error: availableRewardsError } = await supabase
+        .from("ReademableReward")
+        .select("*")
+        .eq("store_id", cardData.store_id!)
+        .lt("cost", pointsData.amount)
+      if (
+        storeError ||
+        !storeData ||
+        pointsError ||
+        !pointsData ||
+        availableRewardsError ||
+        !availableRewardsData
+      ) {
+        return null
+      }
+      return CardModel.create({
+        id: cardData.id,
+        name: cardData.name,
+        image: storeData.logo ?? "",
+        points: pointsData.amount,
+        brandColor: storeData.color ?? "#000000",
+        companyLogo: storeData.logo ?? "",
+        storeName: storeData.name,
+        maxPoints: nextRewardData?.cost || 0,
+        rewardsAvailable: availableRewardsData.length,
+        pointsUntilNextReward: nextRewardData?.cost ? nextRewardData.cost - pointsData.amount : 0,
+        storeId: cardData.store_id ?? "",
+      })
+    },
+
+    async updateCardPoints(cardId: string, amount: number) {
+      const card = store.cards.find((x) => x.id === cardId)
+      if (!card) {
+        console.log("here?")
+        return
+      }
+      card.points = amount
+      card.pointsUntilNextReward = card.maxPoints - amount
+      await this.fetchCard(cardId)
+    },
+
+    async addCard(cardId: string) {
+      try {
+        store.setProp("isLoading", true)
+        const card = await this.fetchCard(cardId)
+        if (!card) {
+          store.setProp("isLoading", false)
+          return
+        }
+        store.setProp("cards", [...store.cards, card])
+      } catch (error) {
+        console.error(`Error adding card: ${error}`)
+      } finally {
+        store.setProp("isLoading", false)
+      }
+    },
+
+    setCard(card: Instance<typeof CardModel>) {
+      store.setProp("card", card.id)
     },
   }))
 

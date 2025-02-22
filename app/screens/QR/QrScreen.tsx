@@ -1,21 +1,72 @@
 import { $styles, colors, ThemedStyle } from "@/theme"
 import { Button, Icon, Screen, Text } from "../../components"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { FC } from "react"
+import { FC, useEffect, useState } from "react"
 import { RouteNames } from "@/navigators/RouteNames"
-import { View, ViewStyle, TextStyle } from "react-native"
+import { View, ViewStyle, TextStyle, ActivityIndicator } from "react-native"
 import QRCode from "react-native-qrcode-svg"
-import { AppStackScreenProps } from "@/navigators"
+import { QRScanOperation, QRScanPayload } from "@/utils/QrScanPayload"
+import { supabase } from "@/supabase/supabase"
+import { User } from "@supabase/auth-js"
+import { MainTabScreenProps } from "@/navigators/MainNavigator"
+import { RootStackParamList } from "@/navigators/MainNavigator"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
 
-export const QrScreen: FC<AppStackScreenProps<RouteNames.QRModal>> = ({ navigation }) => {
+type Props =
+  | MainTabScreenProps<RouteNames.QR>
+  | NativeStackScreenProps<RootStackParamList, RouteNames.QRModal>
+
+export const QrScreen: FC<Props> = ({ navigation, route }) => {
   const { themed } = useAppTheme()
+  const [user, setUser] = useState<User | null>(null)
+  const [qrPayload, setQrPayload] = useState<QRScanPayload | null>(null)
+  const [rewardId, setRewardId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (route.params?.rewardId) {
+      setRewardId(route.params.rewardId)
+    }
+  }, [route.params?.rewardId])
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (!user) {
+          return
+        }
+        setUser(user)
+        if (rewardId) {
+          setQrPayload({
+            userId: user.id,
+            operation: QRScanOperation.SUBTRACT_STORE_POINTS,
+            rewardId: rewardId,
+          })
+        } else {
+          setQrPayload({
+            userId: user.id,
+            operation: QRScanOperation.CREATE_STORE_CARD,
+          })
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    getUser()
+  }, [rewardId, user])
+
+  if (!qrPayload) {
+    return <ActivityIndicator />
+  }
 
   return (
     <Screen preset="fixed" safeAreaEdges={["bottom"]}>
       <View style={[themed($header), $styles.row]}>
         <View style={themed($scanContainer)}>
           <Text size="lg" weight="semiBold" style={themed($scanText)}>
-            Scan
+            {rewardId ? `Scan to redeem` : "Scan"}
           </Text>
         </View>
         <View>
@@ -28,14 +79,14 @@ export const QrScreen: FC<AppStackScreenProps<RouteNames.QRModal>> = ({ navigati
         </View>
       </View>
       <View style={[themed($qrContainer), themed($centered), $styles.container]}>
-        <QRCode size={300} value="https://fuckyoucoin.my.canva.site/" />
+        <QRCode size={300} value={qrPayload ? JSON.stringify(qrPayload) : ""} />
 
         <View style={themed($accountContainer)}>
           <Text size="lg" weight="semiBold" style={themed($accountText)}>
             My account
           </Text>
           <Text size="xs" style={themed($emailText)}>
-            randomemail@gmail.com
+            {user?.email}
           </Text>
           <Text size="xs" style={themed($descriptionText)}>
             This is your personal QR code! Scan it at Punkto terminals to collect points and unlock

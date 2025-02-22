@@ -1,4 +1,3 @@
-import { AppStackScreenProps } from "@/navigators"
 import { RouteNames } from "@/navigators/RouteNames"
 import { FC, useEffect, useState } from "react"
 import { Screen, Text } from "../../components"
@@ -10,11 +9,14 @@ import { Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { RewardsTab } from "@/components/Card/details/RewardsTab"
 import { InfoTab } from "@/components/Card/details/InfoTab"
+import { observer } from "mobx-react-lite"
+import { Reward } from "@/models/Reward"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { RootStackParamList } from "@/navigators/MainNavigator"
 
-export const CardDetailScreen: FC<AppStackScreenProps<RouteNames.CardDetails>> = ({
-  navigation,
-  route,
-}) => {
+type Props = NativeStackScreenProps<RootStackParamList, RouteNames.CardDetails>
+
+export const CardDetailScreen: FC<Props> = observer(({ navigation, route }) => {
   const { cardStore } = useStores()
   const { cardId } = route.params
   const { themed } = useAppTheme()
@@ -22,7 +24,12 @@ export const CardDetailScreen: FC<AppStackScreenProps<RouteNames.CardDetails>> =
   const [selectedTab, setSelectedTab] = useState<"rewards" | "infos">("rewards")
 
   useEffect(() => {
-    cardStore.fetchCard(cardId)
+    const card = cardStore.cards.find((card) => card.id === cardId)
+    if (card) {
+      cardStore.setCard(card)
+    } else {
+      cardStore.addCard(cardId)
+    }
   }, [cardId, cardStore])
 
   useHeader({
@@ -33,9 +40,14 @@ export const CardDetailScreen: FC<AppStackScreenProps<RouteNames.CardDetails>> =
     },
   })
 
+  const handleRewardPress = (reward: Reward) => {
+    navigation.navigate(RouteNames.QRModal, { rewardId: reward.id })
+  }
+
   return (
     <Screen preset="scroll" contentContainerStyle={$styles.container}>
       <Card
+        pointsUntilNextReward={cardStore.card?.pointsUntilNextReward ?? 0}
         companyLogo={cardStore.card?.companyLogo ?? ""}
         storeName={cardStore.card?.storeName ?? ""}
         points={cardStore.card?.points ?? 0}
@@ -69,11 +81,11 @@ export const CardDetailScreen: FC<AppStackScreenProps<RouteNames.CardDetails>> =
           </Text>
         </Pressable>
       </View>
-      {selectedTab === "rewards" && <RewardsTab />}
+      {selectedTab === "rewards" && <RewardsTab onRewardPress={handleRewardPress} />}
       {selectedTab === "infos" && <InfoTab />}
     </Screen>
   )
-}
+})
 
 const $cardDetailTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,

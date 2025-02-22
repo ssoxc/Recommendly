@@ -1,28 +1,34 @@
-import { Pressable, View, ViewStyle } from "react-native"
+import { ActivityIndicator, Pressable, View, ViewStyle } from "react-native"
 import { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { Card } from "./Card"
 import { useStores } from "@/models"
 import { CardSnapshotIn } from "@/models/Card"
 import { useEffect } from "react"
+import { observer } from "mobx-react-lite"
 
 export interface ICardListProps {
   style?: ViewStyle
   containerStyle?: ViewStyle
   onCardPress?: (card: CardSnapshotIn) => void
   cards?: CardSnapshotIn[]
+  onCardUpdate?: (card: CardSnapshotIn) => void
 }
-export function CardList(_props: ICardListProps) {
+export const CardList = observer(function CardList(_props: ICardListProps) {
   const { themed } = useAppTheme()
   const { cardStore } = useStores()
 
   useEffect(() => {
     cardStore.fetchCards()
-  }, [])
+  }, [cardStore])
+
+  if (cardStore.isLoading) {
+    return <ActivityIndicator />
+  }
 
   return (
     <View style={_props.containerStyle ?? themed($container)}>
-      {[...(_props.cards || cardStore.cards)].map((card, index) => (
+      {[...cardStore.cards].map((card, index) => (
         <View
           key={index}
           style={
@@ -42,7 +48,7 @@ export function CardList(_props: ICardListProps) {
       ))}
     </View>
   )
-}
+})
 
 const $container: ThemedStyle<ViewStyle> = () => ({
   borderRadius: 15,

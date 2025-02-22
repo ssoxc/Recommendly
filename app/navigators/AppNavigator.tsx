@@ -20,6 +20,8 @@ import { RegisterScreen } from "@/screens/Register/RegisterScreen"
 import { RegisterOneLastStepScreen } from "@/screens/Register/RegisterOneLastStepScreen"
 import { RegisterInterestsScreen } from "@/screens/Register/RegisterInterestsScreen"
 import { RegisterDoneScreen } from "@/screens/Register/RegisterDone"
+import React from "react"
+import { Reward } from "@/models/Reward"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -46,7 +48,7 @@ export type AppStackParamList = {
   [RouteNames.RegisterDone]: undefined
   [RouteNames.AllCards]: undefined
   [RouteNames.CardDetails]: { cardId: string }
-  [RouteNames.QRModal]: undefined
+  [RouteNames.QRModal]: NavigatorScreenParams<{ reward?: Reward }>
 }
 
 /**
@@ -93,9 +95,9 @@ const AppStack = observer(function AppStack() {
       initialRouteName={getInitialRoute()}
     >
       {isAuthenticated ? (
-        <>
+        <React.Fragment>
           <Stack.Screen name={RouteNames.Main} component={MainNavigator} />
-        </>
+        </React.Fragment>
       ) : (
         <>
           <Stack.Screen name={RouteNames.Welcome} component={Screens.WelcomeScreen} />
@@ -122,7 +124,6 @@ export interface NavigationProps extends Partial<ComponentProps<typeof Navigatio
 export const AppNavigator = observer(function AppNavigator(props: NavigationProps) {
   const { themeScheme, navigationTheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider()
-
   useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
 
   return (

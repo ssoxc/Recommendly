@@ -4,14 +4,17 @@ import { RouteNames } from "@/navigators/RouteNames"
 import { useHeader } from "@/utils/useHeader"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { $styles, colors, ThemedStyle } from "@/theme"
-import { TextInput, TextStyle, View, ViewStyle } from "react-native"
+import { Alert, TextInput, TextStyle, View, ViewStyle } from "react-native"
 import { AppStackScreenProps } from "@/navigators"
 import { translate } from "@/i18n"
 import { useStores } from "@/models"
+import { supabase } from "@/supabase/supabase"
+import { observer } from "mobx-react-lite"
 
 interface RegisterScreenProps extends AppStackScreenProps<RouteNames.Register> {}
 
-export const RegisterScreen: FC<RegisterScreenProps> = ({ navigation }) => {
+export const RegisterScreen: FC<RegisterScreenProps> = observer(function RegisterScreen(_props) {
+  const { navigation } = _props
   const { themed } = useAppTheme()
   const authPasswordInput = useRef<TextInput>(null)
   const authPasswordConfirmationInput = useRef<TextInput>(null)
@@ -21,6 +24,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = ({ navigation }) => {
     authenticationStore: {
       authEmail,
       setAuthEmail,
+      setAuthToken,
       validationError,
       validationErrorPassword,
       authPassword,
@@ -36,20 +40,6 @@ export const RegisterScreen: FC<RegisterScreenProps> = ({ navigation }) => {
     onLeftPress: () => navigation.goBack(),
   })
 
-  useEffect(() => {
-    // Here is where you could fetch credentials from keychain or storage
-    // and pre-fill the form fields.
-    setAuthEmail("test@test.com")
-  }, [setAuthEmail])
-
-  useEffect(() => {
-    setAuthPassword("test1234")
-  }, [setAuthPassword])
-
-  useEffect(() => {
-    setAuthPasswordConfirmation("test1234")
-  }, [setAuthPasswordConfirmation])
-
   const error = validationError
   const errorPassword = validationErrorPassword
   const errorPasswordConfirmation = validationErrorPasswordConfirmation
@@ -61,8 +51,23 @@ export const RegisterScreen: FC<RegisterScreenProps> = ({ navigation }) => {
     !authPasswordConfirmation ||
     !!errorPasswordConfirmation
 
-  const register = () => {
+  const register = async () => {
     if (isDisabled) return
+    const { error, data } = await supabase.auth.signUp({
+      email: authEmail,
+      password: authPassword,
+      options: {
+        emailRedirectTo: "https://oatdnwshffxmeyauogzm.supabase.co/auth/v1/callback",
+        data: {
+          role: "User",
+        },
+      },
+    })
+    if (error) {
+      Alert.alert(error.message)
+      return
+    }
+    setAuthToken(data.session?.access_token)
     navigation.navigate(RouteNames.RegisterOneLastStep)
   }
 
@@ -157,7 +162,7 @@ export const RegisterScreen: FC<RegisterScreenProps> = ({ navigation }) => {
       </View>
     </Screen>
   )
-}
+})
 
 const $continueBtnDisabled: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: "rgba(74, 18, 79, 0.6)",
