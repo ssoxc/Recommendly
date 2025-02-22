@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { RouteNames } from "./RouteNames"
 import { translate } from "@/i18n"
 import { Icon } from "@/components"
-import { CompositeScreenProps, useRoute } from "@react-navigation/native"
+import { CompositeScreenProps, useRoute, useNavigation } from "@react-navigation/native"
 import { TipsScreen } from "@/screens/Tips/TipsScreen"
 import { QrScreen } from "@/screens/QR/QrScreen"
 import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navigation/native-stack"
@@ -16,9 +16,10 @@ import { ProfileScreen } from "@/screens/Profile/ProfileScreen"
 import { AllCardsScreen } from "@/screens/Cards/AllCardScreen"
 import { CardDetailScreen } from "@/screens/Cards/CardDetailScreen"
 import { useStores } from "@/models"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { setupRewardPointChannel, supabase } from "@/supabase/supabase"
 import { FC } from "react"
+import { Toast } from "toastify-react-native"
 
 export type MainTabParamList = {
   Home: undefined
@@ -131,35 +132,54 @@ const QRModal: FC<NativeStackScreenProps<RootStackParamList, RouteNames.QRModal>
 
 export function MainNavigator() {
   const route = useRoute()
+  const navigation = useNavigation()
   const { cardStore } = useStores()
+  const [isListenerInitialized, setIsListenerInitialized] = useState(false)
 
   useEffect(() => {
     const setupHandlers = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (cardStore.cards.length === 0) {
-        return
-      }
-      if (!user?.id) {
-        return
-      }
-      console.log(user.id, "user.id")
-      return setupRewardPointChannel(
+      if (cardStore.cards.length === 0 || !user?.id || isListenerInitialized) return
+
+      setupRewardPointChannel(
         cardStore.cards.map((card) => card.id),
         user.id,
         (cardId, amount) => {
-          console.log("cardId", cardId, "amount", amount)
+          const oldPoints = cardStore.cards.find((card) => card.id === cardId)?.points
+          console.log("oldPoints", oldPoints)
+          let earnedPoints = amount
+          console.log("earnedPoints", earnedPoints)
+          if (oldPoints) {
+            earnedPoints = amount - oldPoints
+          }
           cardStore.updateCardPoints(cardId, amount)
+          if (cardStore.isQrScreenVisible) {
+            cardStore.setQrScreenVisible(false)
+            navigation.goBack()
+          }
+
+          Toast.success(
+            earnedPoints
+              ? `Hooraaay! You've earned ${earnedPoints} points!`
+              : "Transaction successful",
+            "top",
+          )
         },
         (cardId) => {
-          console.log("cardId is new card created", cardId)
           cardStore.addCard(cardId)
+          if (cardStore.isQrScreenVisible) {
+            cardStore.setQrScreenVisible(false)
+            navigation.goBack()
+          }
+          Toast.success(`Hooraaay! You just got a new card!`, "top")
         },
       )
+      setIsListenerInitialized(true)
     }
     setupHandlers()
-  }, [cardStore, route])
+  }, [cardStore, route, isListenerInitialized, navigation])
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

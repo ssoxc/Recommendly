@@ -24,7 +24,7 @@ import { useEffect, useState } from "react"
 import { initialWindowMetrics, SafeAreaProvider } from "react-native-safe-area-context"
 import * as Linking from "expo-linking"
 import * as SplashScreen from "expo-splash-screen"
-import { useInitialRootStore, useStores } from "./models"
+import { useInitialRootStore } from "./models"
 import { AppNavigator, useNavigationPersistence } from "./navigators"
 import { ErrorBoundary } from "./screens/ErrorScreen/ErrorBoundary"
 import * as storage from "./utils/storage"
@@ -32,7 +32,8 @@ import { customFontsToLoad } from "./theme"
 import Config from "./config"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { loadDateFnsLocale } from "./utils/formatDate"
-import { setupRewardPointChannel } from "./supabase/supabase"
+import ToastManager from "toastify-react-native"
+import { ViewStyle, TextStyle } from "react-native"
 
 export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
@@ -109,6 +110,17 @@ export function App() {
   // otherwise, we're ready to render the app
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <ToastManager
+        position="top"
+        style={$toast}
+        textStyle={$toastText}
+        animationIn="slideInDown"
+        animationOut="slideOutUp"
+        duration={5000}
+        hasBackdrop={false}
+        backdropColor="transparent"
+        showCloseIcon={false}
+      />
       <ErrorBoundary catchErrors={Config.catchErrors}>
         <KeyboardProvider>
           <AppNavigator
@@ -120,4 +132,21 @@ export function App() {
       </ErrorBoundary>
     </SafeAreaProvider>
   )
+}
+
+const $toast: ViewStyle = {
+  width: "90%",
+  borderRadius: 14,
+  backgroundColor: "rgba(0,0,0,0.8)",
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  alignItems: "center",
+  justifyContent: "center",
+}
+
+const $toastText: TextStyle = {
+  fontSize: 14,
+  fontWeight: "500",
+  color: "#FFFFFF",
+  textAlign: "center",
 }

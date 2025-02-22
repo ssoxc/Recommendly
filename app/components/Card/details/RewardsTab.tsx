@@ -1,25 +1,19 @@
 import { ThemedStyle } from "@/theme"
 import { useAppTheme } from "@/utils/useAppTheme"
-import { ActivityIndicator, Alert, TouchableOpacity, View, ViewStyle } from "react-native"
+import { Alert, TouchableOpacity, View, ViewStyle } from "react-native"
 import { Text } from "../../../components"
 import { observer } from "mobx-react-lite"
 import { useStores } from "@/models"
-import { useEffect } from "react"
 import { Reward } from "@/models/Reward"
 
 interface RewardsTabProps {
   onRewardPress: (reward: Reward) => void
+  rewards: Reward[]
 }
 
-export const RewardsTab = observer<RewardsTabProps>(({ onRewardPress }) => {
+export const RewardsTab = observer<RewardsTabProps>(({ onRewardPress, rewards }) => {
   const { themed } = useAppTheme()
-  const { rewardStore, cardStore } = useStores()
-
-  useEffect(() => {
-    if (cardStore.card?.storeId) {
-      rewardStore.fetchRewards(cardStore.card?.storeId ?? "")
-    }
-  }, [cardStore.card?.storeId, rewardStore])
+  const { cardStore } = useStores()
 
   const getRewardBackgroundColor = (cost: number) => {
     if (cost <= 100) {
@@ -42,17 +36,13 @@ export const RewardsTab = observer<RewardsTabProps>(({ onRewardPress }) => {
     onRewardPress(reward)
   }
 
-  if (rewardStore.isLoading) {
-    return <ActivityIndicator />
-  }
-
   return (
     <View style={themed($cardDetailContentContainer)}>
       <Text size="xs" weight="semiBold">
         Choose from the following options.
       </Text>
       <View style={themed($rewardsContainer)}>
-        {rewardStore.rewards.map((reward, index) => (
+        {rewards.map((reward, index) => (
           <TouchableOpacity
             onPress={() => handleRewardPress(reward)}
             style={[

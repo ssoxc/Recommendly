@@ -11,42 +11,48 @@ import { User } from "@supabase/auth-js"
 import { MainTabScreenProps } from "@/navigators/MainNavigator"
 import { RootStackParamList } from "@/navigators/MainNavigator"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-
+import { useStores } from "@/models"
+import { observer } from "mobx-react-lite"
 type Props =
   | MainTabScreenProps<RouteNames.QR>
   | NativeStackScreenProps<RootStackParamList, RouteNames.QRModal>
 
-export const QrScreen: FC<Props> = ({ navigation, route }) => {
+export const QrScreen: FC<Props> = observer(({ navigation, route }) => {
   const { themed } = useAppTheme()
   const [user, setUser] = useState<User | null>(null)
   const [qrPayload, setQrPayload] = useState<QRScanPayload | null>(null)
   const [rewardId, setRewardId] = useState<string | null>(null)
+  const { cardStore } = useStores()
 
   useEffect(() => {
+    console.log("rewardId", route.params?.rewardId)
     if (route.params?.rewardId) {
       setRewardId(route.params.rewardId)
     }
   }, [route.params?.rewardId])
 
   useEffect(() => {
-    const getUser = async () => {
+    const getUser = async (rwId: string | null) => {
       try {
         const {
-          data: { user },
+          data: { user: supabaseUser },
         } = await supabase.auth.getUser()
-        if (!user) {
+        if (!supabaseUser) {
           return
         }
-        setUser(user)
-        if (rewardId) {
+        if (!user) {
+          setUser(supabaseUser)
+        }
+
+        if (rwId) {
           setQrPayload({
-            userId: user.id,
+            userId: supabaseUser.id,
             operation: QRScanOperation.SUBTRACT_STORE_POINTS,
-            rewardId: rewardId,
+            rewardId: rwId,
           })
         } else {
           setQrPayload({
-            userId: user.id,
+            userId: supabaseUser.id,
             operation: QRScanOperation.CREATE_STORE_CARD,
           })
         }
@@ -54,8 +60,22 @@ export const QrScreen: FC<Props> = ({ navigation, route }) => {
         console.error(error)
       }
     }
-    getUser()
+    getUser(rewardId)
   }, [rewardId, user])
+
+  useEffect(() => {
+    console.log("useEffect")
+    cardStore.setQrScreenVisible(true)
+    return () => {
+      console.log("unmount")
+      cardStore.setQrScreenVisible(false)
+    }
+  }, [])
+
+  const handleClose = () => {
+    cardStore.setQrScreenVisible(false)
+    navigation.goBack()
+  }
 
   if (!qrPayload) {
     return <ActivityIndicator />
@@ -70,12 +90,7 @@ export const QrScreen: FC<Props> = ({ navigation, route }) => {
           </Text>
         </View>
         <View>
-          <Icon
-            icon="x"
-            size={30}
-            color={colors.palette.neutral500}
-            onPress={() => navigation.goBack()}
-          />
+          <Icon icon="x" size={30} color={colors.palette.neutral500} onPress={handleClose} />
         </View>
       </View>
       <View style={[themed($qrContainer), themed($centered), $styles.container]}>
@@ -98,13 +113,13 @@ export const QrScreen: FC<Props> = ({ navigation, route }) => {
             textStyle={themed($buttonText)}
             style={themed($button)}
             tx="common:close"
-            onPress={() => navigation.goBack()}
+            onPress={handleClose}
           />
         </View>
       </View>
     </Screen>
   )
-}
+})
 
 const $scanText: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginLeft: spacing.md,

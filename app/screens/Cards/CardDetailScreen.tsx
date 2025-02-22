@@ -5,7 +5,7 @@ import { $styles, ThemedStyle } from "@/theme"
 import { useHeader } from "@/utils/useHeader"
 import { useStores } from "@/models"
 import { Card } from "@/components/Card/Card"
-import { Pressable, TextStyle, View, ViewStyle } from "react-native"
+import { ActivityIndicator, Pressable, TextStyle, View, ViewStyle } from "react-native"
 import { useAppTheme } from "@/utils/useAppTheme"
 import { RewardsTab } from "@/components/Card/details/RewardsTab"
 import { InfoTab } from "@/components/Card/details/InfoTab"
@@ -17,20 +17,22 @@ import { RootStackParamList } from "@/navigators/MainNavigator"
 type Props = NativeStackScreenProps<RootStackParamList, RouteNames.CardDetails>
 
 export const CardDetailScreen: FC<Props> = observer(({ navigation, route }) => {
-  const { cardStore } = useStores()
+  const { cardStore, rewardStore } = useStores()
   const { cardId } = route.params
   const { themed } = useAppTheme()
 
   const [selectedTab, setSelectedTab] = useState<"rewards" | "infos">("rewards")
 
   useEffect(() => {
+    console.log("cardId", cardId)
     const card = cardStore.cards.find((card) => card.id === cardId)
     if (card) {
       cardStore.setCard(card)
     } else {
       cardStore.addCard(cardId)
     }
-  }, [cardId, cardStore])
+    rewardStore.fetchRewards(cardStore.card?.storeId ?? "")
+  }, [cardId, cardStore, rewardStore])
 
   useHeader({
     title: cardStore.card?.name ?? "Card Detail",
@@ -42,6 +44,10 @@ export const CardDetailScreen: FC<Props> = observer(({ navigation, route }) => {
 
   const handleRewardPress = (reward: Reward) => {
     navigation.navigate(RouteNames.QRModal, { rewardId: reward.id })
+  }
+
+  if (rewardStore.isLoading) {
+    return <ActivityIndicator />
   }
 
   return (
@@ -81,7 +87,9 @@ export const CardDetailScreen: FC<Props> = observer(({ navigation, route }) => {
           </Text>
         </Pressable>
       </View>
-      {selectedTab === "rewards" && <RewardsTab onRewardPress={handleRewardPress} />}
+      {selectedTab === "rewards" && (
+        <RewardsTab onRewardPress={handleRewardPress} rewards={rewardStore.rewards} />
+      )}
       {selectedTab === "infos" && <InfoTab />}
     </Screen>
   )

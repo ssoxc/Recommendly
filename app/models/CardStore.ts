@@ -11,9 +11,14 @@ export const CardStoreModel = types
     card: types.maybe(types.reference(CardModel)),
     favorites: types.array(types.reference(CardModel)),
     favoritesOnly: false,
+    isQrScreenVisible: false,
   })
   .actions(withSetPropAction)
   .actions((store) => ({
+    setQrScreenVisible(visible: boolean) {
+      store.setProp("isQrScreenVisible", visible)
+    },
+
     async fetchCards() {
       try {
         store.setProp("isLoading", true)
