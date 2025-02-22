@@ -24,7 +24,6 @@ export const CardDetailScreen: FC<Props> = observer(({ navigation, route }) => {
   const [selectedTab, setSelectedTab] = useState<"rewards" | "infos">("rewards")
 
   useEffect(() => {
-    console.log("cardId", cardId)
     const card = cardStore.cards.find((card) => card.id === cardId)
     if (card) {
       cardStore.setCard(card)

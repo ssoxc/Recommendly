@@ -26,16 +26,14 @@ export const AllCardsScreen: FC<AppStackScreenProps<RouteNames.AllCards>> = ({ n
       <CardList
         cards={cardStore.cards}
         onCardPress={(card) => {
+          cardStore.clearCard()
           navigation.navigate(RouteNames.CardDetails, { cardId: card.id })
         }}
-        containerStyle={themed($cardListContainer)}
         style={themed($cardList)}
       />
     </Screen>
   )
 }
-
-const $cardListContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({})
 
 const $cardList: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.xs,

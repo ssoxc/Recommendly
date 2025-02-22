@@ -35,6 +35,7 @@ export const CardStoreModel = types
             return await this.fetchCard(card.id)
           }) as Promise<CardSnapshotIn>[]
           const cards = await Promise.all(promises)
+          console.log(cards, "cards")
           store.setProp("cards", cards)
         }
       } catch (error) {
@@ -132,8 +133,16 @@ export const CardStoreModel = types
       }
     },
 
-    setCard(card: Instance<typeof CardModel>) {
+    setCard(card: Instance<typeof CardModel> | null) {
+      if (!card) {
+        store.setProp("card", undefined)
+        return
+      }
       store.setProp("card", card.id)
+    },
+
+    clearCard() {
+      store.setProp("card", undefined)
     },
   }))
 

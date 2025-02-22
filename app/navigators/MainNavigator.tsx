@@ -162,8 +162,8 @@ export function MainNavigator() {
 
           Toast.success(
             earnedPoints
-              ? `Hooraaay! You've earned ${earnedPoints} points!`
-              : "Transaction successful",
+              ? `Hooraaay! You've earned ${earnedPoints} points! 🎉`
+              : "Transaction successful 🎉",
             "top",
           )
         },

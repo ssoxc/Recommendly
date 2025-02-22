@@ -9,7 +9,6 @@ import { RecommendationList } from "@/components/Recommendation/RecommendationLi
 import { RouteNames } from "@/navigators/RouteNames"
 import { SupportCard } from "@/components/SupportCard"
 import { observer } from "mobx-react-lite"
-import { CardSnapshotIn } from "@/models/Card"
 import { useRoute } from "@react-navigation/native"
 
 export const HomeScreen: FC<MainTabScreenProps<RouteNames.Home>> = observer(
