@@ -48,19 +48,28 @@ export function Card({
         </View>
       </View>
 
-      <View style={themed($bottomContainer)}>
-        <View style={themed($upcomingRewardContainer)}>
+      {pointsUntilNextReward > 0 && (
+        <View style={themed($bottomContainer)}>
+          <View style={themed($upcomingRewardContainer)}>
+            <Text size="xxs" style={themed($upcomingReward)}>
+              Upcoming Reward
+            </Text>
+            <Text size="xxs" style={themed($upcomingReward)}>
+              + {pointsUntilNextReward} P
+            </Text>
+          </View>
+          <View style={themed($progressContainer)}>
+            <View style={[themed($progressBar), { width: `${progressWidth}%` }]} />
+          </View>
+        </View>
+      )}
+      {pointsUntilNextReward <= 0 && (
+        <View style={themed($bottomContainer)}>
           <Text size="xxs" style={themed($upcomingReward)}>
-            Upcoming Reward
-          </Text>
-          <Text size="xxs" style={themed($upcomingReward)}>
-            + {pointsUntilNextReward} P
+            No upcoming reward
           </Text>
         </View>
-        <View style={themed($progressContainer)}>
-          <View style={[themed($progressBar), { width: `${progressWidth}%` }]} />
-        </View>
-      </View>
+      )}
     </View>
   )
 }
