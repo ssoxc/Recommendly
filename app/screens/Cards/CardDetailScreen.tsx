@@ -45,7 +45,7 @@ export const CardDetailScreen: FC<Props> = observer(({ navigation, route }) => {
     navigation.navigate(RouteNames.QRModal, { rewardId: reward.id })
   }
 
-  if (rewardStore.isLoading) {
+  if (rewardStore.isLoading || cardStore.isLoading) {
     return <ActivityIndicator />
   }
 
