@@ -26,7 +26,6 @@ export const AllCardsScreen: FC<AppStackScreenProps<RouteNames.AllCards>> = ({ n
       <CardList
         cards={cardStore.cards}
         onCardPress={(card) => {
-          cardStore.clearCard()
           navigation.navigate(RouteNames.CardDetails, { cardId: card.id })
         }}
         style={themed($cardList)}
