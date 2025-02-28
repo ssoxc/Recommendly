@@ -17,7 +17,7 @@ import { AllCardsScreen } from "@/screens/Cards/AllCardScreen"
 import { CardDetailScreen } from "@/screens/Cards/CardDetailScreen"
 import { useStores } from "@/models"
 import { useEffect, useState } from "react"
-import { setupRewardPointChannel, supabase } from "@/supabase/supabase"
+import { setupRewardPointChannel, setupTransactionChannel, supabase } from "@/supabase/supabase"
 import { FC } from "react"
 import { Toast } from "toastify-react-native"
 
@@ -142,18 +142,11 @@ export function MainNavigator() {
         data: { user },
       } = await supabase.auth.getUser()
       if (cardStore.cards.length === 0 || !user?.id || isListenerInitialized) return
-
-      setupRewardPointChannel(
+      console.log("cardStore.cards", cardStore.cards)
+      setupTransactionChannel(
         cardStore.cards.map((card) => card.id),
-        user.id,
         (cardId, amount) => {
-          const oldPoints = cardStore.cards.find((card) => card.id === cardId)?.points
-          console.log("oldPoints", oldPoints)
-          let earnedPoints = amount
-          console.log("earnedPoints", earnedPoints)
-          if (oldPoints) {
-            earnedPoints = amount - oldPoints
-          }
+          console.log("earnedPoints", amount)
           cardStore.updateCardPoints(cardId, amount)
           if (cardStore.isQrScreenVisible) {
             cardStore.setQrScreenVisible(false)
@@ -161,21 +154,39 @@ export function MainNavigator() {
           }
 
           Toast.success(
-            earnedPoints
-              ? `Hooraaay! You've earned ${earnedPoints} points! 🎉`
+            amount
+              ? `Hooraaay! You've earned ${Math.abs(amount)} points! 🎉`
               : "Transaction successful 🎉",
             "top",
           )
         },
-        (cardId) => {
-          cardStore.addCard(cardId)
+        async (cardId, rewardId, amount) => {
+          const oldPoints = cardStore.cards.find((card) => card.id === cardId)?.points
+          console.log("oldPoints", oldPoints)
+          let earnedPoints = amount
+          console.log("earnedPoints", earnedPoints)
+          if (oldPoints) {
+            earnedPoints = amount + oldPoints
+          }
+          cardStore.updateCardPoints(cardId, earnedPoints)
           if (cardStore.isQrScreenVisible) {
             cardStore.setQrScreenVisible(false)
             navigation.goBack()
           }
-          Toast.success(`Hooraaay! You just got a new card!`, "top")
+
+          if (rewardId) {
+            const { data } = await supabase
+              .from("ReademableReward")
+              .select("name")
+              .eq("id", rewardId)
+              .single()
+            if (data) {
+              Toast.success(`You successfully redeemed ${data.name}`, "top")
+            }
+          }
         },
       )
+
       setIsListenerInitialized(true)
     }
     setupHandlers()

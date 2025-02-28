@@ -15,6 +15,44 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
 })
 
+export const setupTransactionChannel = (
+  cardIds: string[],
+  onCardUpdate: (cardId: string, amount: number) => void,
+  onRewardInsert: (cardId: string, rewardId: string, amount: number) => void,
+) => {
+  const transactionChannel = supabase
+    .channel("TransactionHistory")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "TransactionHistory",
+        filter: `card_id=in.(${cardIds.join(",")})`,
+      },
+      (payload) => {
+        console.log("payload", payload)
+        const p = payload as unknown as {
+          new: {
+            card_id: string
+            amount: number
+            reward_id?: string
+            transactiontype: "Purchase" | "Reward"
+          }
+        }
+        if (p.new.transactiontype === "Purchase") {
+          onCardUpdate(p.new.card_id, p.new.amount)
+        } else if (p.new.transactiontype === "Reward" && p.new.reward_id) {
+          onRewardInsert(p.new.card_id, p.new.reward_id, p.new.amount)
+        }
+      },
+    )
+    .subscribe()
+  return () => {
+    transactionChannel.unsubscribe()
+  }
+}
+
 export const setupRewardPointChannel = (
   cardIds: string[],
   userId: string,
@@ -32,7 +70,6 @@ export const setupRewardPointChannel = (
         filter: `card_id=in.(${cardIds.join(",")})`,
       },
       (payload) => {
-        console.log("payload", payload)
         const p = payload as unknown as { new: { card_id: string; amount: number } }
         onCardUpdate(p.new.card_id, p.new.amount)
       },
